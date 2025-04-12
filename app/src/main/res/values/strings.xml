@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name" translatable="false">NoComment</string>
+    <string name="title_activity_main" translatable="false">NoComment</string>
+    <string name="hide_comment_name">HideCommentService</string>
+</resources>
