@@ -4,7 +4,7 @@
 NoComment 是一款用于隐藏特定应用评论区的 Android 应用。它通过无障碍服务实现对哔哩哔哩和抖音等应用评论区的自动隐藏，为用户提供更加简洁的浏览体验。用户可以在应用设置中轻松开启或关闭相应功能，同时应用会根据系统主题自动适配界面颜色。
 
 ## 下载链接
-你可以通过以下链接下载 NoComment 应用：[https://wwti.lanzoub.com/chuyidev-NoComment](https://wwti.lanzoub.com/chuyidev-NoComment)
+你可以通过以下链接下载 NoComment 应用：[https://wwti.lanzouk.com/s/chuyidev-NoComment](https://wwti.lanzouk.com/s/chuyidev-NoComment)
 
 ## 功能特性
 1. **多应用支持**：目前支持哔哩哔哩（长视频、短视频、动态）和抖音应用的评论区隐藏。
@@ -62,10 +62,12 @@ private fun hideDouyinComment(root: AccessibilityNodeInfo) {
 ```
 
 ## 下一步计划
-目前的下一步计划是实现应用的后台防杀功能，确保应用在后台能够稳定运行，持续提供评论隐藏服务。具体的实现思路和方案正在研究中，后续会持续更新项目。
+~~目前的下一步计划是实现应用的后台防杀功能，确保应用在后台能够稳定运行，持续提供评论隐藏服务。具体的实现思路和方案正在研究中，后续会持续更新项目。~~
+添加更多应用
 
 ## 注意事项
 - 应用需要无障碍服务权限才能正常工作，请确保在系统设置中开启该权限。
+- 确保打开了保活措施
 - 由于不同应用的界面结构可能会发生变化，某些情况下可能无法正常隐藏评论区，请关注应用更新以获取更好的兼容性。
 
 ## 贡献与反馈
