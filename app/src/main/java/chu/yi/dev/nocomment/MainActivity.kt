@@ -1,13 +1,19 @@
 package chu.yi.dev.nocomment
 
-import android.content.Context
+import android.annotation.SuppressLint
 import android.content.Intent
+import android.graphics.drawable.Drawable
+import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.widget.ImageView
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AlertDialog
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -30,11 +36,13 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
@@ -49,11 +57,14 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
  * Don't Edit For It
  */
 class MainActivity : ComponentActivity() {
-    private val TAG = "MainActivity"
+    //private val TAG = "MainActivity"
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         GlobalData.readFromCache(this.applicationContext)
+        val serviceIntent = Intent(this, PersistentNotificationService::class.java)
+        startForegroundService(serviceIntent)
         setContent {
             AppTheme{
                 MainScreen()
@@ -79,11 +90,13 @@ class MainActivity : ComponentActivity() {
 
         //State
         var isAccEnabled by remember { mutableStateOf(false) }
+        var isNotification by remember {  mutableStateOf(false)}
         var groupStateMap by remember { mutableStateOf(viewMap.mapValues { it.value.map { entry -> entry.key to entry.value.invoke() } }) }
 
         //辅助函数与Map、List
         fun updateState() {
             isAccEnabled = isAccessibilityEnabled(context, packageName)
+            isNotification = NotificationManagerCompat.from(this).areNotificationsEnabled()
             groupStateMap = viewMap.mapValues { it.value.map { entry -> entry.key to entry.value.invoke() } }
         }
 
@@ -111,8 +124,8 @@ class MainActivity : ComponentActivity() {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // 无障碍功能权限状态卡片
-            AccessibilityStatusCard(isAccEnabled, context)
-
+            //AccessibilityStatusCard(isAccEnabled, context)
+            PermissionCheckScreen(isAccEnabled, isNotification)
             // 循环添加不同功能区的设置卡片
             groupStateMap.forEach { (groupName, switchMap) ->
                 SettingsCard(
@@ -126,12 +139,10 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    // 无障碍功能权限状态卡片
+
     @Composable
-    fun AccessibilityStatusCard(
-        isAccessibilityEnabled: Boolean,
-        context: Context
-    ) {
+    fun PermissionCheckScreen(isAccEnabled: Boolean,isNotification: Boolean) {
+
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -140,27 +151,86 @@ class MainActivity : ComponentActivity() {
             elevation = CardDefaults.cardElevation(4.dp)
         ) {
             Column(
-                modifier = Modifier.padding(24.dp),
-                verticalArrangement = Arrangement.spacedBy(24.dp)
+                modifier = Modifier.padding(24.dp).fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Text(
-                    text = "无障碍功能权限状态：${if (isAccessibilityEnabled) "已经启用" else "未启用"}",
+                    text = "应用保活设置",
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary
                 )
-                Button(
-                    onClick = {
-                        val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
-                        context.startActivity(intent)
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Text(text = "前往无障碍设置", fontSize = 18.sp)
+                Column {
+                    Text(text = "应用后台锁定：")
+                    Text(text = "进入后台管理，找到‘NoComment’，设置锁定", fontSize = 14.sp)
+                    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth()){
+                        Button(onClick = {
+                            openLockHelp()
+                        }) {
+                            Text(text = "设置帮助")
+                        }
+                    }
+                }
+                Text(text = "通知权限: ${if (isNotification) "已开启" else "未开启"}",
+                    color = if(isNotification) Color.Black  else Color.Red)
+                if (!isNotification) {
+                    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth()){
+                        Button(onClick = {
+                            openNotificationSettings()
+                        }) {
+                            Text(text = "开启通知权限")
+                        }
+                    }
+                }
+                Text(text = "无障碍权限: ${if (isAccEnabled) "已开启" else "未开启"}",
+                        color = if(isAccEnabled) Color.Black  else Color.Red)
+                if (!isAccEnabled) {
+                    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth()){
+                        Button(onClick = {
+                            openAccessibilitySettings()
+                        }) {
+                            Text(text = "开启无障碍权限")
+                        }
+                    }
                 }
             }
         }
+    }
+
+    @SuppressLint("UseCompatLoadingForDrawables")
+    private fun openLockHelp(){
+        val imageView = ImageView(this)
+        // 这里使用系统自带的图片资源作为示例，你可以替换为自己的图片资源
+        val drawable: Drawable? = getDrawable(R.drawable.help)
+        imageView.setImageDrawable(drawable)
+        val builder = AlertDialog.Builder(this)
+        builder.setView(imageView)
+        builder.setCancelable(false) // 设置对话框不可通过点击外部关闭
+        val dialog = builder.create()
+        dialog.show()
+        imageView.setOnClickListener {
+            dialog.dismiss()
+        }
+    }
+
+    private fun openNotificationSettings() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val intent = Intent()
+            intent.action = Settings.ACTION_APP_NOTIFICATION_SETTINGS
+            intent.putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
+            startActivity(intent)
+        } else {
+            val intent = Intent()
+            intent.action = "android.settings.APP_NOTIFICATION_SETTINGS"
+            intent.putExtra("app_package", packageName)
+            intent.putExtra("app_uid", applicationInfo.uid)
+            startActivity(intent)
+        }
+    }
+
+    private fun openAccessibilitySettings() {
+        val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+        startActivity(intent)
     }
 
     // 设置卡片
@@ -192,7 +262,7 @@ class MainActivity : ComponentActivity() {
                     SwitchSetting(
                         label = name,
                         isChecked = isCheckedProvider,
-                        isAccessibilityEnabled = isAccEnabled,
+                        //isAccessibilityEnabled = isAccEnabled,
                         onCheckedChange = { isChecked ->
                             if (isAccEnabled) {
                                 onSwitchChange(name, isChecked)
@@ -209,7 +279,7 @@ class MainActivity : ComponentActivity() {
     fun SwitchSetting(
         label: String,
         isChecked: Boolean,
-        isAccessibilityEnabled: Boolean,
+        //isAccessibilityEnabled: Boolean,
         onCheckedChange: (Boolean) -> Unit
     ) {
         Row(
@@ -221,7 +291,7 @@ class MainActivity : ComponentActivity() {
             Switch(
                 checked = isChecked,
                 onCheckedChange = onCheckedChange,
-                enabled = isAccessibilityEnabled
+                enabled = true
             )
         }
     }

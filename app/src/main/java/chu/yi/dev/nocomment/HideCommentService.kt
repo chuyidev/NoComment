@@ -9,14 +9,15 @@ import android.view.accessibility.AccessibilityNodeInfo
  * Edit It In 'onAccessibilityEvent'
  */
 class HideCommentService : AccessibilityService() {
+
     private val TAG = "HideCommentService"
-    private fun queryNodeTree(rootNode: AccessibilityNodeInfo) {
-        Log.d(TAG, "!!start queryNodeTree: ")
-        val layoutStructure = StringBuilder()
-        buildLayoutStructure(rootNode, 0, layoutStructure)
-        Log.d(TAG, layoutStructure.toString())
-        Log.d(TAG, "!!end findCommentArea: ")
-    }
+//    private fun queryNodeTree(rootNode: AccessibilityNodeInfo) {
+//        Log.d(TAG, "!!start queryNodeTree: ")
+//        val layoutStructure = StringBuilder()
+//        buildLayoutStructure(rootNode, 0, layoutStructure)
+//        Log.d(TAG, layoutStructure.toString())
+//        Log.d(TAG, "!!end findCommentArea: ")
+//    }
 
     private fun buildLayoutStructure(node: AccessibilityNodeInfo, depth: Int, sb: StringBuilder) {
         val indent = StringBuilder()
@@ -44,10 +45,20 @@ class HideCommentService : AccessibilityService() {
         super.onServiceConnected()
         Log.d(TAG, "onServiceConnected: ")
         mService = this
+        GlobalData.readFromCache(this.applicationContext)
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
-//        if(event.eventType!= AccessibilityEvent.TYPE_VIEW_CLICKED) return
+        if(event.eventType !in listOf(
+                AccessibilityEvent.TYPE_VIEW_CLICKED,
+                AccessibilityEvent.TYPE_TOUCH_INTERACTION_START,
+                AccessibilityEvent.TYPE_TOUCH_INTERACTION_END,
+                AccessibilityEvent.TYPE_TOUCH_EXPLORATION_GESTURE_END,
+                AccessibilityEvent.TYPE_TOUCH_EXPLORATION_GESTURE_START,
+                AccessibilityEvent.TYPE_VIEW_LONG_CLICKED,
+                AccessibilityEvent.TYPE_VIEW_SCROLLED
+        ))return
+
         val rootNode = rootInActiveWindow
         if (rootNode != null) {
             val packageName = rootNode.packageName.toString()
@@ -113,6 +124,7 @@ class HideCommentService : AccessibilityService() {
 
     override fun onInterrupt() {
         Log.d(TAG, "onInterrupt: ")
+        GlobalData.readFromCache(this.applicationContext)
     }
 
     override fun onDestroy() {

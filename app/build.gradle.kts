@@ -13,7 +13,7 @@ android {
         minSdk = 24
         targetSdk = 35
         versionCode = 1
-        versionName = "1.0"
+        versionName = "1.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -53,6 +53,12 @@ dependencies {
     implementation(libs.androidx.material3)
 
     implementation(libs.accompanist.systemuicontroller)
+
+    //noinspection GradleDependency,GradleDependency
+    implementation(libs.androidx.lifecycle.service)
+    //noinspection GradleDependency,GradleDependency
+    implementation(libs.androidx.work.runtime.ktx)
+
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
