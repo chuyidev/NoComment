@@ -13,23 +13,34 @@ object GlobalData {
     var bilibiliShortVideo: Boolean = false
     var bilibiliFeed: Boolean = false
     var douyin: Boolean = false
+    var zhihuquestion: Boolean = false
+    //var wxVideo: Boolean = false
 
     val globalDataMap = mapOf(
         "bilibiliLongVideo" to ::bilibiliLongVideo,
         "bilibiliShortVideo" to ::bilibiliShortVideo,
         "bilibiliFeed" to ::bilibiliFeed,
-        "douyin" to ::douyin
+        "douyin" to ::douyin,
+        "zhihuQuestion" to ::zhihuquestion,
+        //"wxVideo" to ::wxVideo
     )
 
     val viewMap = mapOf(
-        "Bilibili功能区" to mapOf<String, KMutableProperty0<Boolean>>(
-            "Bilibili长视频评论区屏蔽" to ::bilibiliLongVideo,
-            "Bilibili短视频评论区屏蔽" to ::bilibiliShortVideo,
-            "Bilibili动态评论区屏蔽" to ::bilibiliFeed
+        "B站功能区" to mapOf<String, KMutableProperty0<Boolean>>(
+            "B站长视频评论区屏蔽" to ::bilibiliLongVideo,
+            "B站短视频评论区屏蔽" to ::bilibiliShortVideo,
+            "B站动态评论区屏蔽" to ::bilibiliFeed
         ),
-        "Douyin功能区" to mapOf<String, KMutableProperty0<Boolean>>(
+        "抖音功能区" to mapOf<String, KMutableProperty0<Boolean>>(
             "抖音评论区屏蔽" to ::douyin
-        )
+        ),
+        "知乎功能区" to mapOf<String, KMutableProperty0<Boolean>>(
+            "知乎回答评论区屏蔽" to ::zhihuquestion
+        ),
+//        "微信功能区" to mapOf<String, KMutableProperty0<Boolean>>(
+//            "微信视频号评论区屏蔽" to ::wxVideo
+//        )
+
     )
 
     fun saveForCache(context: Context){

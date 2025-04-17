@@ -11,13 +11,13 @@ import android.view.accessibility.AccessibilityNodeInfo
 class HideCommentService : AccessibilityService() {
 
     private val TAG = "HideCommentService"
-//    private fun queryNodeTree(rootNode: AccessibilityNodeInfo) {
-//        Log.d(TAG, "!!start queryNodeTree: ")
-//        val layoutStructure = StringBuilder()
-//        buildLayoutStructure(rootNode, 0, layoutStructure)
-//        Log.d(TAG, layoutStructure.toString())
-//        Log.d(TAG, "!!end findCommentArea: ")
-//    }
+    private fun queryNodeTree(rootNode: AccessibilityNodeInfo) {
+        Log.d(TAG, "!!start queryNodeTree: ")
+        val layoutStructure = StringBuilder()
+        buildLayoutStructure(rootNode, 0, layoutStructure)
+        Log.d(TAG, layoutStructure.toString())
+        Log.d(TAG, "!!end findCommentArea: ")
+    }
 
     private fun buildLayoutStructure(node: AccessibilityNodeInfo, depth: Int, sb: StringBuilder) {
         val indent = StringBuilder()
@@ -58,12 +58,12 @@ class HideCommentService : AccessibilityService() {
                 AccessibilityEvent.TYPE_VIEW_LONG_CLICKED,
                 AccessibilityEvent.TYPE_VIEW_SCROLLED
         ))return
-
         val rootNode = rootInActiveWindow
         if (rootNode != null) {
             val packageName = rootNode.packageName.toString()
-            Log.d(TAG, "onAccessibilityEvent:packageName $packageName")
 
+            Log.d(TAG, "onAccessibilityEvent:packageName $packageName")
+            Log.d(TAG, "onAccessibilityEvent:TYPE ${event.eventType}")
             if (packageName == "tv.danmaku.bili") {
                 if(GlobalData.bilibiliLongVideo) hideBilibiliLongVideoComment(rootNode)
                 if(GlobalData.bilibiliShortVideo) hideBilibiliShortVideoComment(rootNode)
@@ -72,8 +72,31 @@ class HideCommentService : AccessibilityService() {
                 //douyin
                 if(GlobalData.douyin) hideDouyinComment(rootNode)
                 //queryNodeTree(rootNode)  // 看一下View结构
+            }else if(packageName == "com.zhihu.android"){
+                //queryNodeTree(rootNode)
+                if (GlobalData.zhihuquestion) hideZhihuQuestionComment(rootNode)
+            }else if(packageName == "com.tencent.mm"){
+                var parent = event.source?.parent
+                while (parent != null){
+                    if (parent.parent!=null){
+                        parent = parent.parent
+                    }else{
+                        break
+                    }
+                }
+//                //Log.d(TAG, "com.tencent.m: ${info}")
+//                parent?.let { queryNodeTree(it) }
             }
+
         }
+    }
+
+    private fun hideZhihuQuestionComment(root: AccessibilityNodeInfo){
+        val clos = root.findAccessibilityNodeInfosByViewId("com.zhihu.android:id/iv_close")
+        if (clos.isEmpty()){
+            return
+        }
+        clos[0]?.performAction(AccessibilityNodeInfo.ACTION_CLICK)
     }
 
     private fun hideBilibiliLongVideoComment(root: AccessibilityNodeInfo) {
